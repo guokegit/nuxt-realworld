@@ -1,7 +1,7 @@
 name: GitHub Actions Demo
 on:
   push:
-  tags:
+    tags:
       - 'v*'
 jobs:
   build-and-deploy:
@@ -27,21 +27,19 @@ jobs:
       release_name: Release ${{ github.ref }}
       draft: false
       prerelease: false
+
 # 上传构建结果到 Release
 - name: Upload Release Asset
     id: upload-release-asset
     uses: actions/upload-release-asset@master
     env:
-GITHUB_TOKEN: ${{ secrets.TOKEN }}
-  with:
-    upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls
-  from the CREATE RELEASE step above, referencing it's ID to get its outputs
-object, which include a `upload_url`. See this blog post for more info:
-  https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-
-  steps
-asset_path: ./release.tgz
-asset_name: release.tgz
-asset_content_type: application/x-tgz
+      GITHUB_TOKEN: ${{ secrets.TOKEN }}
+    with:
+    upload_url: ${{ steps.create_release.outputs.upload_url }}
+    asset_path: ./release.tgz
+    asset_name: release.tgz
+    asset_content_type: application/x-tgz
+
 # 部署到服务器
 - name: Deploy
     uses: appleboy/ssh-action@master
@@ -53,6 +51,6 @@ asset_content_type: application/x-tgz
       script: |
         cd /root/app
         wget https://github.com/guokegit/nuxt-realworld/releases/latest/download/release.tgz -O release.tgz
-  tar zxvf release.tgz
-  npm install --production
-  pm2 reload pm2.config.json
+        tar zxvf release.tgz
+        npm install --production
+        pm2 reload pm2.config.json
