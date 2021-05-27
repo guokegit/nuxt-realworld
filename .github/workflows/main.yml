@@ -1,8 +1,9 @@
-name: GitHub Actions Demo
+name: Publish And Deploy Demo
 on:
   push:
     tags:
       - 'v*'
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -38,10 +39,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release.tgz
-        asset_name: release.tgz
-        asset_content_type: application/x-tgz
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release.tgz
+          asset_name: release.tgz
+          asset_content_type: application/x-tgz
 
       # 部署到服务器
       - name: Deploy
@@ -56,4 +57,4 @@ jobs:
             wget https://github.com/guokegit/nuxt-realworld/releases/latest/download/release.tgz -O release.tgz
             tar zxvf release.tgz
             npm install --production
-            pm2 reload pm2.config.json
+            pm2 reload pm2.config.js
