@@ -1,0 +1,7 @@
+{
+  "app": {
+    "name": "nuxt-world",
+    "script": "npm",
+    "args": "start"
+  }
+}
