@@ -24,14 +24,12 @@
       {
         "path": "profile/:username",
         "name": "profile",
-        "middleware": "authenticate",
         "component": "/Users/guoke/Desktop/nuxt-realworld/pages/profile",
         "_name": "_717aab60"
       },
       {
         "path": "settings",
         "name": "settings",
-        "middleware": "authenticate",
         "component": "/Users/guoke/Desktop/nuxt-realworld/pages/settings",
         "_name": "_4f1ad14c"
       },
