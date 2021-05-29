@@ -22,12 +22,10 @@ module.exports = {
                 },{
                     path: 'profile/:username',
                     name: 'profile',
-                    middleware: 'authenticate',
                     component: resolve(__dirname, 'pages/profile/'),
                 },{
                     path: 'settings',
                     name: 'settings',
-                    middleware: 'authenticate',
                     component: resolve(__dirname, 'pages/settings/'),
                 },{
                     path: 'editor',
