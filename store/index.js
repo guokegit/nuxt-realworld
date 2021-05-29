@@ -21,7 +21,7 @@ export default {
                     const user = JSON.parse(cookieObj.user)
                     commit('setUser', user)
                 }catch (err){
-                    console.dir(err)
+                    // console.dir(err)
                 }
                 
             }

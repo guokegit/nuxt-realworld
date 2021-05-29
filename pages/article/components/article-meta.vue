@@ -1,47 +1,17 @@
 <template>
   <div class="article-meta">
-    <nuxt-link :to="{
-                    name: 'profile',
-                    params:{
-                       username: article.author.username
-                    }
-                  }"
-    >
-      <img :src="article.author.image" />
-    </nuxt-link>
-    <div class="info">
-      <nuxt-link :to="{
-                      name: 'profile',
-                      params:{
-                         username: article.author.username
-                      }
-                    }" class="author"
-      >
-        {{article.author.username}}
-      </nuxt-link>
-      <span class="date">{{article.createdAt | date}}</span>
-    </div>
+    <user-card :user="article.author" :date="article.createdAt" />
 
-    <button class="btn btn-sm btn-outline-secondary" :class="{active: article.author.following}" @click="onFollow(article)">
-      <i class="ion-plus-round"></i>
-      &nbsp;
-      {{ article.author.following ? 'UnFollow' : 'Follow' }} {{article.author.username}}
-    </button>
+    <user-following :user="article.author" />
     &nbsp;&nbsp;
-    <button class="btn btn-sm btn-outline-primary" :class="{active: article.favorited}" @click="favourite(article)">
-      <i class="ion-heart"></i>
-      &nbsp;
-      Favorite Post <span class="counter">({{article.favoritesCount}})</span>
-    </button>
+    <user-favourite :article="article" label="Favorite Post" />
   </div>
 </template>
 
 <script>
-import {
-  addFavourite,
-  removeFavourite,
-} from '../../../api/article';
-import { follow, unFollow } from '../../../api/user';
+import UserCard from './user-card'
+import UserFollowing from './user-following'
+import UserFavourite from './user-favourite'
 
 export default {
   name: 'ArticleMeta',
@@ -51,31 +21,10 @@ export default {
       required: true,
     }
   },
-  methods: {
-    favourite(art){
-      if(art.favorited){
-        removeFavourite(art.slug)
-        art.favorited = false;
-        art.favoritesCount += -1;
-      }else {
-        addFavourite(art.slug)
-        art.favorited = true;
-        art.favoritesCount += 1;
-      }
-
-      // this.$emit('refresh')
-    },
-    onFollow(art){
-      if(art.author.following){
-        unFollow(art.author.username)
-        art.author.following = false;
-      }else {
-        follow(art.author.username)
-        art.author.following = true;
-      }
-
-      // this.$emit('refresh')
-    }
+  components: {
+    UserCard,
+    UserFollowing,
+    UserFavourite,
   }
 };
 </script>

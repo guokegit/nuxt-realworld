@@ -71,7 +71,7 @@ export default {
         // 将登陆状态存储到全局
         vm.$store.commit('setUser', data.data.user);
         // 将登陆状态存储到cookie（服务端可以拿到，在服务端渲染时可以再次存到store共享到客户端）
-        cookie.set('user', JSON.stringify(data.data.user))
+        cookie.set('user', JSON.stringify(data.data.user || {}))
 
         vm.$router.push('/')
       }).catch(err => {

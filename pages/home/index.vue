@@ -26,43 +26,9 @@
               </li>
             </ul>
           </div>
-<!--文章列表-->
-          <div style="max-height: calc(100vh - 200px); width: 100%; overflow: auto;">
-            <div class="article-preview" v-for="article in articles" :key="article.slug">
-              <div class="article-meta">
-                <nuxt-link :to="{
-                    name: 'profile',
-                    params:{
-                       username: article.author.username
-                    }
-                  }"
-                >
-                  <img :src="article.author.image" />
-                </nuxt-link>
-                <div class="info">
-                  <nuxt-link :to="{
-                      name: 'profile',
-                      params:{
-                         username: article.author.username
-                      }
-                    }" class="author"
-                  >
-                    {{article.author.username}}
-                  </nuxt-link>
-                  <span class="date">{{article.createdAt | date}}</span>
-                </div>
-                <button class="btn btn-outline-primary btn-sm pull-xs-right" :class="{active: article.favorited}" @click="favourite(article)">
-                  <i class="ion-heart"></i> {{article.favoritesCount}}
-                </button>
-              </div>
-              <nuxt-link :to="{name: 'article', params: {slug: article.slug}}" class="preview-link">
-                <h1>{{article.title}}</h1>
-                <p>{{article.description}}</p>
-                <span>Read more...</span>
-              </nuxt-link>
-            </div>
-          </div>
-<!--分页-->
+          <!--文章列表-->
+          <article-list :articles="articles" />
+          <!--分页-->
           <nav>
             <ul class="pagination">
               <li class="page-item" :class="{active: pageNumber === page }" v-for="pageNumber in totalPage" :key="pageNumber">
@@ -92,6 +58,7 @@
 import { getArticleList, getFeedArticles, addFavourite, removeFavourite } from '../../api/article';
 import { getTags } from '../../api/tags';
 import { mapState } from 'vuex';
+import ArticleList from './article-list'
 
 export default {
   name: 'home',
@@ -106,11 +73,15 @@ export default {
       tab: this.user ? 'YOUR_FEED' : 'GLOBAL_FEED'
     }
   },
-  fetch () {
-    this.searchArticleList()
-    this.getTags()
+  async fetch(){
+    await Promise.all([
+      this.searchArticleList(),
+      this.getTags()
+    ])
   },
-
+  components: {
+    ArticleList,
+  },
   computed: {
     totalPage(){
       return Math.ceil(this.articlesTotal/this.limit)
@@ -160,24 +131,10 @@ export default {
 
     initPage(){
       this.page = 1;
-    },
-
-    favourite(art){
-      if(art.favorited){
-        removeFavourite(art.slug)
-        art.favorited = false;
-        art.favoritesCount += -1;
-      }else {
-        addFavourite(art.slug)
-        art.favorited = true;
-        art.favoritesCount += 1;
-      }
-      this.searchArticleList()
     }
-
-
   }
 };
+
 </script>
 
 <style scoped>

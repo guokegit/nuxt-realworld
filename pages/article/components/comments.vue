@@ -79,7 +79,6 @@ export default {
     async getArticleComments(){
       const {data} = await getArticleComments(this.slug)
       this.comments = data.comments || []
-      console.log(data)
     },
     async addComments(){
       await addComments(this.slug, {

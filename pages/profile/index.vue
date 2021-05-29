@@ -6,15 +6,16 @@
         <div class="row">
 
           <div class="col-xs-12 col-md-10 offset-md-1">
-            <img src="http://i.imgur.com/Qr71crq.jpg" class="user-img" />
-            <h4>Eric Simons</h4>
-            <p>
-              Cofounder @GoThinkster, lived in Aol's HQ for a few months, kinda looks like Peeta from the Hunger Games
-            </p>
-            <button class="btn btn-sm btn-outline-secondary action-btn">
-              <i class="ion-plus-round"></i>
-              &nbsp;
-              Follow Eric Simons
+            <img :src="user.image" class="user-img" />
+            <h4>{{user.username}}</h4>
+            <p>{{ user.bio }}</p>
+            <user-following :user="user" v-if="user.username !== $store.state.user.username" />
+            <button
+                v-else
+                class="btn btn-sm btn-outline-secondary"
+                @click="signOut"
+            >
+              Sign Out
             </button>
           </div>
 
@@ -29,54 +30,23 @@
           <div class="articles-toggle">
             <ul class="nav nav-pills outline-active">
               <li class="nav-item">
-                <a class="nav-link active" href="">My Articles</a>
+                <a class="nav-link" @click="changeTab('My_Articles')" :class="{active: tab==='My_Articles'}">My Articles</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="">Favorited Articles</a>
+                <a class="nav-link" @click="changeTab('Favorited_Articles')" :class="{active: tab==='Favorited_Articles'}">Favorited Articles</a>
               </li>
             </ul>
           </div>
 
-          <div class="article-preview">
-            <div class="article-meta">
-              <a href=""><img src="http://i.imgur.com/Qr71crq.jpg" /></a>
-              <div class="info">
-                <a href="" class="author">Eric Simons</a>
-                <span class="date">January 20th</span>
-              </div>
-              <button class="btn btn-outline-primary btn-sm pull-xs-right">
-                <i class="ion-heart"></i> 29
-              </button>
-            </div>
-            <a href="" class="preview-link">
-              <h1>How to build webapps that scale</h1>
-              <p>This is the description for the post.</p>
-              <span>Read more...</span>
-            </a>
-          </div>
-
-          <div class="article-preview">
-            <div class="article-meta">
-              <a href=""><img src="http://i.imgur.com/N4VcUeJ.jpg" /></a>
-              <div class="info">
-                <a href="" class="author">Albert Pai</a>
-                <span class="date">January 20th</span>
-              </div>
-              <button class="btn btn-outline-primary btn-sm pull-xs-right">
-                <i class="ion-heart"></i> 32
-              </button>
-            </div>
-            <a href="" class="preview-link">
-              <h1>The song you won't ever stop singing. No matter how hard you try.</h1>
-              <p>This is the description for the post.</p>
-              <span>Read more...</span>
-              <ul class="tag-list">
-                <li class="tag-default tag-pill tag-outline">Music</li>
-                <li class="tag-default tag-pill tag-outline">Song</li>
-              </ul>
-            </a>
-          </div>
-
+          <article-list :articles="articles" />
+          <!--分页-->
+          <nav>
+            <ul class="pagination">
+              <li class="page-item" :class="{active: pageNumber === page }" v-for="pageNumber in totalPage" :key="pageNumber">
+                <a class="page-link" @click="changePage(pageNumber)">{{pageNumber}}</a>
+              </li>
+            </ul>
+          </nav>
 
         </div>
 
@@ -88,9 +58,84 @@
 </template>
 
 <script>
+import ArticleList from '../home/article-list';
+import UserFollowing from '../article/components/user-following'
+import { getArticleList, } from '../../api/article';
+import { profile } from '../../api/user';
+const cookie = process.client ? require('js-cookie') : undefined
+
 export default {
   name: 'profile',
   middleware: 'authenticate',
+  data(){
+    return {
+      user: {},
+      articles: [],
+      articlesTotal: 0,
+      limit: 10,
+      page:1,
+      tab: 'My_Articles'
+    }
+  },
+  async fetch(){
+    const username = this.$route.params.username
+    await this.getProfile(username)
+  },
+  components: {
+    ArticleList,
+    UserFollowing,
+  },
+  computed: {
+    totalPage(){
+      return Math.ceil(this.articlesTotal/this.limit)
+    }
+  },
+  watch:{
+    $route(to,from){
+      console.log(to.params.username);
+      this.getProfile(to.params.username)
+    }
+  },
+  methods: {
+    async getProfile(username){
+      const {data} = await profile(username)
+      this.user = data.profile;
+      await this.searchArticleList();
+    },
+    async searchArticleList(){
+      const filterKey = this.tab === 'My_Articles' ? 'author' : 'favorited'
+      ;
+
+      const {data} = await getArticleList({
+        limit: this.limit,
+        offset: (this.page - 1) * this.limit,
+        [filterKey]: this.user.username
+      });
+
+      this.articles = data.articles;
+      this.articlesTotal = data.articlesCount;
+    },
+
+    changePage(pageNumber){
+      this.page = pageNumber;
+      this.searchArticleList()
+    },
+
+    changeTab(tabKey){
+      this.tab = tabKey;
+      this.initPage()
+      this.searchArticleList()
+    },
+
+    initPage(){
+      this.page = 1;
+    },
+    signOut(){
+      this.$store.commit('setUser', null);
+      cookie.set('user', '')
+      this.$router.push('/')
+    }
+  }
 };
 </script>
 

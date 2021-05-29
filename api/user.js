@@ -15,6 +15,13 @@ export const register = data => {
         data
     })
 }
+export const settings = data => {
+    return request({
+        method: 'PUT',
+        url: '/api/user',
+        data
+    })
+}
 
 export const profile = username => {
     return request({
